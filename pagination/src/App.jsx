@@ -5,7 +5,7 @@ function App() {
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
 
   const fetchApi = async () => {
     try {
@@ -14,24 +14,30 @@ function App() {
       const data = await resp.json();
       setProducts(data);
       setLoading(false);
-      setPagination(products?.slice(0, 10));
+      setPagination(products?.slice(page, 5));
       console.log(pagination);
     } catch (e) {
       console.log(e);
     }
   };
-  let totalPages = Math.ceil(products.length / 10);
+  let totalPages = Math.ceil(products.length / 5);
   console.log("totalPages", totalPages);
   const handlePrevPage = () => {
-    let start = (page - 1) * 10;
-    let end = page * 10;
+    let start = (page - 1) * 5;
+    let end = page * 5;
     setPage(page - 1);
     setPagination(products.slice(start, end));
   };
   const handleNextPage = () => {
-    let start = page * 10 + 1;
-    let end = page > totalPages ? totalPages : start + 10;
-    setPage(end - start + 1);
+    let start = page * 5;
+    let end = start + 5;
+    setPage(page + 1);
+    setPagination(products.slice(start, end));
+  };
+  const handlePaginationButton = (currentPage) => {
+    let start = currentPage * 5;
+    let end = (currentPage + 1) * 5;
+    setPage(currentPage);
     setPagination(products.slice(start, end));
   };
 
@@ -68,9 +74,20 @@ function App() {
         </div>
       )}
       <div style={{ display: "flex" }}>
-        <button onClick={handlePrevPage}>prev</button>
-        <h5>{page}</h5>
-        <button onClick={handleNextPage}>next</button>
+        <button disabled={page <= 0 ? true : false} onClick={handlePrevPage}>
+          prev
+        </button>
+        {new Array(totalPages).fill(0).map((_, i) => {
+          return (
+            <button onClick={() => handlePaginationButton(i)}>{i + 1}</button>
+          );
+        })}
+        <button
+          disabled={page + 1 >= totalPages ? true : false}
+          onClick={handleNextPage}
+        >
+          next
+        </button>
       </div>
     </>
   );
